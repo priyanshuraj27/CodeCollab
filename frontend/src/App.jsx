@@ -4,6 +4,10 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Header from './components/header'
 import Login from './pages/login'
 import Signup from './pages/signup'
+import HostMeetingCard from './pages/hostPage'
+import ProfileSidebar from './components/profileSidebar'
+import JoinMeetingPage from './pages/joinPage'
+import ChatUI from './components/groupChat'
 function App() {
   console.log("App component rendered")
   return (
@@ -20,6 +24,10 @@ function App() {
         <Route path="/header" element={<Header />} />
         <Route path="/login" element={<Login />} />
        < Route path="/signup" element={<Signup />} />
+        <Route path="/host" element={<HostMeetingCard />} />
+        <Route path="/profile" element={<ProfileSidebar />} />
+        <Route path="/join" element={<JoinMeetingPage />} />
+        <Route path="/chat" element={<ChatUI />} />
       </Routes>
     </Router>
   )
