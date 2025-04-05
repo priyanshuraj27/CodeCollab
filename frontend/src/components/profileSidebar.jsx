@@ -1,21 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useSelector } from "react-redux";
 import { Settings, Bell, LogOut, User, X } from "lucide-react";
 
 export default function ProfileSidebar() {
-  const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem("theme") === "dark";
-  });
+  const darkMode = useSelector((state) => state.theme.darkMode);
   const [showNotifications, setShowNotifications] = useState(false);
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [darkMode]);
 
   const handleNotificationClick = () => {
     setShowNotifications(!showNotifications);
@@ -30,14 +19,8 @@ export default function ProfileSidebar() {
       }`}
     >
       <div>
-        <div className="flex justify-between items-center mb-6">
+        <div className="mb-6">
           <h2 className="text-xl font-bold">Profile</h2>
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="text-sm font-medium transition-transform hover:scale-110"
-          >
-            {darkMode ? "☀️" : "🌙"}
-          </button>
         </div>
 
         <div className="flex flex-col items-center mb-6">
@@ -49,9 +32,7 @@ export default function ProfileSidebar() {
         </div>
 
         <div className="space-y-4">
-          <button
-            className="flex items-center gap-3 text-sm font-medium w-full hover:text-[#2B7DBD] transition-colors"
-          >
+          <button className="flex items-center gap-3 text-sm font-medium w-full hover:text-[#2B7DBD] transition-colors">
             <User size={18} /> Edit Profile
           </button>
 

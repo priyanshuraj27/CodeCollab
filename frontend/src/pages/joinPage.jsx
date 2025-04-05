@@ -1,43 +1,25 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useSelector } from "react-redux";
 
 export default function JoinMeetingPage() {
   const [roomId, setRoomId] = useState("");
-  const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem("theme") === "dark";
-  });
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [darkMode]);
+  const isDarkMode = useSelector((state) => state.theme.darkMode);
 
   return (
     <div
       className={`flex items-center justify-center min-h-screen ${
-        darkMode
+        isDarkMode
           ? "bg-[#3C4F67FF]"
           : "bg-gradient-to-br from-[#D1F1D5] to-[#A7C7E7]"
       }`}
     >
       <div
         className={`shadow-xl rounded-2xl border w-[350px] p-6 relative ${
-          darkMode
+          isDarkMode
             ? "bg-gradient-to-br from-[#1A3C66] to-[#2B7DBD] text-white border-[#CBD5E1]"
             : "bg-gradient-to-br from-[#D1F1D5] to-[#A7C7E7] text-[#1A3C66] border-[#2B7DBD]"
         }`}
       >
-        <button
-          onClick={() => setDarkMode(!darkMode)}
-          className="absolute top-4 right-4 text-sm font-medium text-[#2B7DBD] dark:text-yellow-300"
-        >
-          {darkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
-        </button>
-
         <h2 className="text-xl font-semibold text-center mb-1">Join Meeting</h2>
 
         <p className="text-sm text-center mb-4 text-gray-600 dark:text-gray-300">
@@ -50,7 +32,7 @@ export default function JoinMeetingPage() {
           value={roomId}
           onChange={(e) => setRoomId(e.target.value.toUpperCase())}
           className={`w-full px-3 py-2 mb-4 rounded-md border font-mono tracking-wide focus:outline-none focus:ring-2 focus:ring-[#2B7DBD] ${
-            darkMode
+            isDarkMode
               ? "border-gray-500 bg-[#2B7DBD] text-white"
               : "border-gray-300 bg-white text-[#1A3C66]"
           }`}

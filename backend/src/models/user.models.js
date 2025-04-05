@@ -27,12 +27,8 @@ const userSchema = new Schema({
     },
    avatar : {
         type : String, // Cloudinary URL
-        required : true,
+        required : false,
     },
-    watchHistory : [{
-        type :Schema.Types.ObjectId,
-        ref : "Video"}
-    ],
     password : {
         type : String,
         required : [true,"Password is required"],   
