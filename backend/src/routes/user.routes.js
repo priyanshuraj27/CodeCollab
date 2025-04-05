@@ -15,16 +15,12 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const userRouter = Router();
 
-//  Public Routes
-userRouter.post(
-  "/register",
-  upload.fields([{ name: "avatar", maxCount: 1 }]),
-  registerUser
-);
+// ✅ Public Routes 
+userRouter.post("/register", registerUser);
 userRouter.post("/login", loginUser);
 userRouter.post("/refresh-token", refreshAccessToken);
 
-// Protected Routes
+// 🔒 Protected Routes
 userRouter.post("/logout", verifyJWT, logoutUser);
 userRouter.post("/change-password", verifyJWT, changeCurrentPassword);
 userRouter.get("/current-user", verifyJWT, getCurrentUser);
