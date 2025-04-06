@@ -1,4 +1,3 @@
-// EscNotification.jsx
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
 
@@ -18,7 +17,7 @@ const EscNotification = ({ show, darkMode, onClose }) => {
         }
       `}
     >
-      <span className="mr-2">Press ESC to exit fullscreen</span>
+      <span className="mr-2">Press ESC again to exit fullscreen</span>
       <X 
         size={14} 
         onClick={onClose} 

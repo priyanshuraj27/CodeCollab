@@ -17,9 +17,9 @@ import LeaveRoomModal from './components/leaveRoomScreen';
 import ProfilePage from './pages/profilePage';
 import GroupPage from './pages/home';
 import Settings from './pages/setting';
-import RoomPage from './pages/room';
+import Room from './pages/room';
+import { TopBar } from './components';
 import { ToastContainer } from 'react-toastify';
-
 import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
@@ -51,7 +51,10 @@ function App() {
           <Route path="/profile-page" element={<ProfilePage />} />
           <Route path="/home" element={<GroupPage />} />
           <Route path="/settings" element={<Settings />} />
-          <Route path="/room/:roomId" element={<RoomPage />} />
+          {/* <Route path="/room/:roomId" element={<RoomPage />} /> */}
+          {/* <Route path="/code-editor" element={<CodeEditor />} /> */}
+          <Route path="/top-bar" element={<TopBar />} />
+          <Route path="/room/:roomId" element={<Room />} />
         </Route>
       </Routes>
     </Router>

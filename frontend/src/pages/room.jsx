@@ -1,249 +1,174 @@
-import axios from "axios";
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { io } from "socket.io-client";
+import React, { useState, useEffect } from "react";
 import {
-  showSuccessToast,
-  showErrorToast,
-  showWarningToast,
-} from "../utils/toast";
-import { setLoading } from "../redux/authSlice";
-import {
-    LeaveRoomModal,
-    AccessDenied,
-    ControlBar,
-    ProfileSidebar,
-    EscNotification,
-    ShareLinkPopup,
-    LoadingScreen,
-    Footer,
-    Header
-  } from "../components";
-  
-const RoomPage = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const dispatch = useDispatch();
+  TopBar,
+  ControlBar,
+  ShareLinkPopup,
+  EscNotification,
+  LeaveRoomModal,
+  AccessDenied,
+} from "../components";
+import CodeEditor from "../components/codeEditor";
+import { useParams, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+
+const Room = () => {
   const { roomId } = useParams();
-  const codeEditorRef = useRef(null);
-  const socketRef = useRef(null);
-  const userData = useSelector((state) => state.auth.userData);
-  const isAuthenticated = useSelector((state) => state.auth.isAuth);
-  const darkMode = useSelector((state) => state.theme.darkMode);
-  const isLoading = useSelector((state) => state.auth.isLoading);
+  const navigate = useNavigate();
+  const isDarkMode = useSelector((state) => state.theme.darkMode);
 
-  const [messages, setMessages] = useState([]);
-  const [participants, setParticipants] = useState([]);
-  const [code, setCode] = useState("// Write your code here...");
-  const [language, setLanguage] = useState("javascript");
-  const [isTyping, setIsTyping] = useState(false);
-  const [typingContent, setTypingContent] = useState("");
-  const [isHost, setIsHost] = useState(false);
-  const [host , setHost] = useState({});
-  const [isCameraOn, setIsCameraOn] = useState(true);
-  const [isMicOn, setIsMicOn] = useState(true);
-  const [roomLink, setRoomLink] = useState("");
-  const [showCopyPopup, setShowCopyPopup] = useState(false);
+  const [accessDenied, setAccessDenied] = useState(false);
+  const [showSharePopup, setShowSharePopup] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
-  const [showSidebar, setShowSidebar] = useState(false);
-  const [sidebarContent, setSidebarContent] = useState("participants");
-  const [isFullScreenApp, setIsFullScreenApp] = useState(false);
   const [showEscNotification, setShowEscNotification] = useState(false);
-  const typingTimeoutRef = useRef(null);
-  const [notification, setNotification] = useState(null);
-  const socketInitialized = useRef(false);
+  const [lastEscTime, setLastEscTime] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [hostLeft, setHostLeft] = useState(false);
+  const [leaveTimer, setLeaveTimer] = useState(10);
 
+  const roomLink = `${window.location.origin}/room/${roomId}`;
+
+  const shareRoomLink = () => {
+    setShowSharePopup(true);
+  };
+
+  const leaveRoom = () => {
+    navigate("/home");
+  };
+
+  const handleCodeDownload = () => {
+    const blob = new Blob(["// Your code goes here..."], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `code-${roomId}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // 🔐 Simulate Access Check (Replace with real logic later)
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      AccessDeniedScreenComponent(
-        darkMode,
-        navigate,
-        "/login",
-        4,
-        "Access Denied",
-        "Please log in to access the room.",
-        "Redirecting in",
-        { redirectFrom: "/room/roomId" }
-      );
-      const timer = setTimeout(() => {
-        navigate("/login", {
-          state: {
-            message: "Please log in to access the room.",
-            redirectFrom: "/room",
-          },
-        });
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [isAuthenticated, isLoading, navigate]);
-
-  const showNotification = useCallback((message, type = "info") => {
-    setNotification({
-      message,
-      type,
-      timestamp: new Date().toLocaleTimeString(),
-    });
-    setTimeout(() => {
-      setNotification(null);
-    }, 3000);
-  }, []);
-
-  useEffect(() => {
-    if (isAuthenticated && userData && roomId && !socketInitialized.current) {
-      socketInitialized.current = true;
-      dispatch(setLoading(true));
-      const url = `https://codelab-sq6v.onrender.com/room/${roomId}`;
-      axios
-        .get(url, {
-          params: { user: userData },
-          withCredentials: true,
-        })
-        .then((response) => {
-          dispatch(setLoading(false));
-          if (response.data.status === "error" || response.data.status === "warning") {
-            navigate("/join", {
-              state: { message: response.data.message },
-            });
-          } else if (response.data.status === "success") {
-            showSuccessToast(response.data.message);
-            setHost(response.data.host);
-            setIsHost(response.data.host._id === userData._id);
-
-            const socketOptions = {
-              transports: ["websocket", "polling"],
-              reconnectionAttempts: 5,
-            };
-
-            socketRef.current = io(`https://codelab-sq6v.onrender.com`, socketOptions);
-
-            socketRef.current.on("connect_error", (err) => {
-              showErrorToast("Failed to connect to the server. Please try again.");
-              navigate("/join", {
-                state: { message: "Failed to connect to the server. Please try again." },
-              });
-            });
-
-            socketRef.current.emit("join-room", {
-              roomId,
-              user: {
-                ...userData,
-                isHost,
-                isMicOn,
-                isCameraOn,
-              },
-            });
-
-            socketRef.current.on("room-state", (data) => {
-              setParticipants(data.roomUsers);
-              setCode(data.code);
-              setLanguage(data.language);
-              setMessages(data.messages);
-              setIsHost(data.isHost);
-            });
-
-            socketRef.current.on("user-joined", (data) => {
-              if (data.user) {
-                showNotification(`${data.user?.fullname || 'unknown'} joined the room`, "success");
-              }
-              setParticipants(data.roomUsers);
-            });
-
-            socketRef.current.on("code-update", (newCode) => setCode(newCode));
-            socketRef.current.on("language-update", (newLanguage) => setLanguage(newLanguage));
-            socketRef.current.on("new-message", (messageData) => {
-              setMessages(messageData);
-              showNotification(`${messageData.sender.fullname} sent a message in chats`, "info");
-            });
-
-            socketRef.current.on("user-left", (data) => {
-              setParticipants(data.roomUsers);
-              if (data.user && data.user._id !== userData._id) {
-                showNotification(`${data.user.fullname} left the room`, "info");
-              }
-            });
-
-            socketRef.current.on("user-typing", (username) => {
-              setTypingContent(`${username} is Typing...`);
-              setIsTyping(true);
-              if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-              typingTimeoutRef.current = setTimeout(() => setIsTyping(false), 1000);
-            });
-
-            socketRef.current.on("room-closed", () => {
-              showNotification("The host left the room. The session is ending.", "error");
-              setTimeout(() => navigate("/"), 3000);
-            });
-
-            socketRef.current.on("user-blocked", (user) => {
-              if (user._id === userData._id) {
-                showNotification("You have been blocked from this room.", "error");
-                setTimeout(() => navigate("/"), 3000);
-              } else {
-                showNotification(`User ${user.fullname} has been blocked from this room.`, "error");
-              }
-            });
-          }
-          setRoomLink(`${window.location.origin}/room/${roomId}`);
-        })
-        .catch((err) => {
-          dispatch(setLoading(false));
-          navigate("/join", {
-            state: { message: err.response?.data?.message || "Something went wrong!" },
-          });
-        });
-
-      return () => {
-        if (socketRef?.current) {
-          socketRef.current.emit("leave-room");
-          socketRef.current.disconnect();
+    const checkAccess = async () => {
+      try {
+        // TODO: Replace with backend check (e.g. fetch /api/room/validate)
+        const isAllowed = false;
+        if (!isAllowed) {
+          setAccessDenied(true);
         }
-        if (typingTimeoutRef?.current) clearTimeout(typingTimeoutRef.current);
-      };
-    }
-  }, [isAuthenticated, userData, roomId, navigate, showNotification, dispatch]);
+      } catch (err) {
+        setAccessDenied(true);
+      }
+    };
 
+    checkAccess();
+  }, [roomId]);
+
+  // ESC key behavior
   useEffect(() => {
-    if (isFullScreenApp) {
-      setShowEscNotification(true);
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && isFullscreen) {
+        const now = Date.now();
+        if (now - lastEscTime < 2000) {
+          leaveRoom();
+        } else {
+          setShowEscNotification(true);
+          setLastEscTime(now);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [lastEscTime, isFullscreen]);
+
+  // Auto-dismiss ESC notification
+  useEffect(() => {
+    if (showEscNotification) {
       const timer = setTimeout(() => setShowEscNotification(false), 3000);
       return () => clearTimeout(timer);
     }
-  }, [isFullScreenApp]);
+  }, [showEscNotification]);
 
-  const toggleCamera = useCallback(() => setIsCameraOn((prev) => !prev), []);
-  const toggleMic = useCallback(() => setIsMicOn((prev) => !prev), []);
-  const toggleFullScreenApp = useCallback(() => setIsFullScreenApp((prev) => !prev), []);
-  const shareRoomLink = useCallback(() => setShowCopyPopup(true), []);
+  // Fullscreen change listener
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(document.fullscreenElement !== null);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  // Auto leave on host-left modal timer
+  useEffect(() => {
+    if (hostLeft && leaveTimer > 0) {
+      const interval = setInterval(() => {
+        setLeaveTimer((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    } else if (hostLeft && leaveTimer === 0) {
+      leaveRoom();
+    }
+  }, [hostLeft, leaveTimer]);
+
+  // 🚫 Access Denied Handling
+  if (accessDenied) return <AccessDenied />;
 
   return (
-    <div className={`room-container ${darkMode ? "dark" : "light"}`}>
-      {/* Add your components here: Header, Sidebar, CodeEditor, etc. */}
-      <Header />
-      <ControlBar
-        isMicOn={isMicOn}
-        isCameraOn={isCameraOn}
-        toggleMic={toggleMic}
-        toggleCamera={toggleCamera}
-        shareRoomLink={shareRoomLink}
+    <div className={`min-h-screen flex flex-col ${isDarkMode ? "bg-[#3C4F67FF]" : "bg-gray-100"}`}>
+      {/* TopBar */}
+      <TopBar roomId={roomId} />
+
+      {/* Main Content */}
+      <div className="flex flex-1 overflow-hidden">
+        <ControlBar
+          darkMode={isDarkMode}
+          shareRoomLink={shareRoomLink}
+          leaveRoom={leaveRoom}
+        />
+        <div className="flex-1 p-2">
+          <CodeEditor />
+        </div>
+      </div>
+
+      {/* Share Link Popup */}
+      <ShareLinkPopup
+        show={showSharePopup}
+        roomLink={roomLink}
+        isCopied={isCopied}
+        setIsCopied={setIsCopied}
+        onClose={() => setShowSharePopup(false)}
+        darkMode={isDarkMode}
       />
-      <CodeEditor
-        code={code}
-        setCode={setCode}
-        language={language}
-        setLanguage={setLanguage}
-        socketRef={socketRef}
-        roomId={roomId}
+
+      {/* ESC Notification */}
+      <EscNotification
+        show={showEscNotification && isFullscreen}
+        darkMode={isDarkMode}
+        onClose={() => setShowEscNotification(false)}
       />
-      {showEscNotification && <EscNotification />}
-      <Footer />
-      <AnimatePresence>
-        {showCopyPopup && <ShareLinkPopup link={roomLink} onClose={() => setShowCopyPopup(false)} />}
-      </AnimatePresence>
+
+      {/* Leave Room Modal */}
+      {hostLeft && (
+        <LeaveRoomModal
+          onDownload={handleCodeDownload}
+          onLeave={leaveRoom}
+          timer={leaveTimer}
+          darkMode={isDarkMode}
+        />
+      )}
+
+      {/* 🔧 TEMP TEST BUTTON to simulate host left */}
+      <button
+        onClick={() => {
+          setHostLeft(true);
+          setLeaveTimer(10);
+        }}
+        className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg z-50"
+      >
+        Simulate Host Leaving
+      </button>
     </div>
   );
 };
 
-export default RoomPage;
+export default Room;

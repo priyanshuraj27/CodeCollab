@@ -3,15 +3,15 @@ import Editor from "@monaco-editor/react";
 import { useSelector } from "react-redux";
 import { Loader2 } from "lucide-react";
 
-const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
+const CodeEditor = ({ socketRef = null, roomId = null, onCodeChange = () => {} }) => {
   const editorRef = useRef(null);
   const [code, setCode] = useState("// Start coding...");
   const [isTyping, setIsTyping] = useState(false);
   const [typingTimeout, setTypingTimeout] = useState(null);
 
   const darkMode = useSelector((state) => state.theme.darkMode);
-  const language = useSelector((state) => state.theme.language);
-  const fontSize = useSelector((state) => state.theme.fontSize);
+  const language = useSelector((state) => state.theme.language || "javascript");
+  const fontSize = useSelector((state) => state.theme.fontSize || 14);
 
   const handleEditorDidMount = (editor) => {
     editorRef.current = editor;
@@ -20,9 +20,11 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
   const handleCodeChange = (newValue) => {
     setCode(newValue);
     onCodeChange(newValue);
-    socketRef.current.emit("CODE_CHANGE", { roomId, code: newValue });
 
-    // Typing animation
+    if (socketRef?.current && roomId) {
+      socketRef.current.emit("CODE_CHANGE", { roomId, code: newValue });
+    }
+
     setIsTyping(true);
     if (typingTimeout) clearTimeout(typingTimeout);
     const timeout = setTimeout(() => setIsTyping(false), 800);
@@ -30,7 +32,7 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
   };
 
   useEffect(() => {
-    if (!socketRef.current) return;
+    if (!socketRef?.current) return;
 
     const handleCodeSync = ({ code }) => {
       setCode(code);
@@ -44,25 +46,13 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
   }, [socketRef]);
 
   return (
-    <div className="w-full h-full flex flex-col relative">
-      {/* Typing animation */}
+    <div className="w-full h-screen flex flex-col relative">
       {isTyping && (
         <div className="absolute top-2 right-2 flex items-center gap-2 z-10">
           <Loader2 className="h-4 w-4 text-blue-400 animate-pulse" />
           <span className="text-sm text-blue-400 font-medium">Typing...</span>
         </div>
       )}
-
-      {/* Global style for pulse animation */}
-      <style>{`
-        @keyframes pulse {
-          0% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.05); opacity: 0.75; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-      `}</style>
-
-      {/* Monaco Editor */}
       <div style={{ flex: 1 }}>
         <Editor
           height="100%"
@@ -72,7 +62,7 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
           onChange={handleCodeChange}
           theme={darkMode ? "vs-dark" : "light"}
           options={{
-            fontSize: fontSize,
+            fontSize,
             automaticLayout: true,
             minimap: { enabled: false },
             scrollBeyondLastLine: false,

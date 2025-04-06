@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { FaRegEye, FaRegEyeSlash, FaArrowRight } from "react-icons/fa";
 import logo from "../assets/logo.png";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
 import { showSuccessToast, showErrorToast } from "../utils/toast";
+import { setLogin } from "../redux/authSlice"; // ✅ import Redux login action
 
 const Login = () => {
   const isDarkMode = useSelector((state) => state.theme.darkMode);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -31,8 +33,13 @@ const Login = () => {
         password: formData.password,
       });
 
+      const userData = res.data.user; // adjust if backend sends differently
+      dispatch(setLogin(userData));
+      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("isLoggedIn", "true");
+
       showSuccessToast("Login successful!");
-      navigate("/home"); 
+      navigate("/home");
     } catch (err) {
       showErrorToast(err?.response?.data?.message || "Login failed. Try again.");
     }
@@ -94,7 +101,10 @@ const Login = () => {
         </form>
 
         <p className={`text-center text-sm mt-4 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-          Don't have an account? <a href="/signup" className={`hover:underline ${isDarkMode ? "text-[#CBD5E1]" : "text-[#2B7DBD]"}`}>Sign up</a>
+          Don't have an account?{" "}
+          <a href="/signup" className={`hover:underline ${isDarkMode ? "text-[#CBD5E1]" : "text-[#2B7DBD]"}`}>
+            Sign up
+          </a>
         </p>
       </div>
     </div>

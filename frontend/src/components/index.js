@@ -1,14 +1,13 @@
 import LeaveRoomModal from "./leaveRoomScreen";
 import AccessDenied from "./accessDenied";
 import ControlBar from "./controlBar";
-import ProfileSidebar from "./profileSidebar";
 import EscNotification from "./escNotification";
 import ShareLinkPopup from "./shareLink";
 import ProfileSidebar from "./profileSidebar";
 import LoadingScreen from "./loadingScreen";
 import Footer from "./footer";
 import Header from "./header";
-
+import TopBar from "./topBar";
 export {
   LeaveRoomModal,
   AccessDenied,
@@ -18,5 +17,6 @@ export {
   ShareLinkPopup,
   LoadingScreen,
   Footer,
-  Header
+  Header,
+  TopBar,
 };
