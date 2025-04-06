@@ -33,7 +33,7 @@ const Footer = () => {
 
         <div className="flex space-x-6">
           <motion.a
-            href="https://github.com/your-profile"
+            href="https://github.com/priyanshuraj27"
             target="_blank"
             rel="noopener noreferrer"
             whileHover={{ scale: 1.3, rotate: 10 }}
@@ -45,7 +45,7 @@ const Footer = () => {
           </motion.a>
 
           <motion.a
-            href="https://twitter.com/your-profile"
+            href="https://twitter.com/Bhuvan_goel04"
             target="_blank"
             rel="noopener noreferrer"
             whileHover={{ scale: 1.3, rotate: -10 }}
@@ -57,7 +57,7 @@ const Footer = () => {
           </motion.a>
 
           <motion.a
-            href="https://www.linkedin.com/in/your-profile"
+            href="https://www.linkedin.com/in/priyanshu-raj-iiitn"
             target="_blank"
             rel="noopener noreferrer"
             whileHover={{ scale: 1.3, rotate: 10 }}
