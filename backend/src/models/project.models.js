@@ -38,7 +38,11 @@ const projectSchema = new mongoose.Schema({
   tags: [{
     type: String,
     trim: true,
-  }]
+  }],
+  playground : {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Collab',
+  }
 },{ timestamps: true });
 
 const Project = mongoose.model('Project', projectSchema);

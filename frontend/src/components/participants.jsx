@@ -2,12 +2,15 @@ import React from 'react';
 import { Settings, UserPlus, Mic, MicOff, Video, VideoOff } from "lucide-react";
 
 const ParticipantsList = ({ participants, darkMode }) => {
+  // Ensure we get the array from `participants.message`
+  const participantList = Array.isArray(participants?.message) ? participants.message : [];
+
   return (
     <div className="p-4">
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <span className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-600"}`}>
-          {participants.length} People in Room
+          {participantList.length} People in Room
         </span>
         <button className={`
           flex items-center text-sm font-medium transition-colors
@@ -22,7 +25,7 @@ const ParticipantsList = ({ participants, darkMode }) => {
 
       {/* List */}
       <div className="space-y-3">
-        {participants.map(participant => (
+        {participantList.map((participant) => (
           <div
             key={participant.email}
             className={`
@@ -42,7 +45,7 @@ const ParticipantsList = ({ participants, darkMode }) => {
                 />
               ) : (
                 <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#2B7DBD] to-[#1A3C66] flex items-center justify-center text-white font-semibold shadow-md">
-                  {participant.fullname.charAt(0).toUpperCase()}
+                  {participant.fullname?.charAt(0).toUpperCase() || "?"}
                 </div>
               )}
             </div>
@@ -64,7 +67,6 @@ const ParticipantsList = ({ participants, darkMode }) => {
                 )}
               </div>
 
-              {/* Status */}
               <div className="flex items-center gap-4 mt-1 text-xs">
                 <div className={`flex items-center gap-1 ${
                   participant.isMicOn
@@ -85,7 +87,6 @@ const ParticipantsList = ({ participants, darkMode }) => {
               </div>
             </div>
 
-            {/* Host Control Icon */}
             {participant.isHost && (
               <div className={`ml-3 ${darkMode ? "text-yellow-400" : "text-yellow-600"}`}>
                 <Settings size={18} />

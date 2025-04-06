@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   TopBar,
   ControlBar,
@@ -6,6 +6,7 @@ import {
   EscNotification,
   LeaveRoomModal,
   AccessDenied,
+  ParticipantsSidebar,
 } from "../components";
 import CodeEditor from "../components/codeEditor";
 import { useParams, useNavigate } from "react-router-dom";
@@ -24,19 +25,40 @@ const Room = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [hostLeft, setHostLeft] = useState(false);
   const [leaveTimer, setLeaveTimer] = useState(10);
+  const [isCameraOn, setIsCameraOn] = useState(true);
+  const [isMicOn, setIsMicOn] = useState(true);
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [sidebarContent, setSidebarContent] = useState(null);
 
-  const roomLink = `${window.location.origin}/room/${roomId}`;
+  const editorRef = useRef();
 
-  const shareRoomLink = () => {
-    setShowSharePopup(true);
+  const toggleCamera = () => setIsCameraOn((prev) => !prev);
+  const toggleMic = () => setIsMicOn((prev) => !prev);
+
+  const toggleFullScreenApp = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    } else if (document.exitFullscreen) {
+      document.exitFullscreen();
+    }
   };
 
-  const leaveRoom = () => {
-    navigate("/home");
+  const toggleSidebar = (content) => {
+    if (showSidebar && sidebarContent === content) {
+      setShowSidebar(false);
+      setSidebarContent(null);
+    } else {
+      setShowSidebar(true);
+      setSidebarContent(content);
+    }
   };
+
+  const shareRoomLink = () => setShowSharePopup(true);
+  const leaveRoom = () => navigate("/home");
 
   const handleCodeDownload = () => {
-    const blob = new Blob(["// Your code goes here..."], { type: "text/plain" });
+    const code = editorRef.current?.getCode() || "// No code available";
+    const blob = new Blob([code], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -45,15 +67,12 @@ const Room = () => {
     URL.revokeObjectURL(url);
   };
 
-  // 🔐 Simulate Access Check (Replace with real logic later)
+  // Check room access
   useEffect(() => {
     const checkAccess = async () => {
       try {
-        // TODO: Replace with backend check (e.g. fetch /api/room/validate)
-        const isAllowed = false;
-        if (!isAllowed) {
-          setAccessDenied(true);
-        }
+        const isAllowed = true; // TODO: Replace with real access logic
+        if (!isAllowed) setAccessDenied(true);
       } catch (err) {
         setAccessDenied(true);
       }
@@ -62,7 +81,7 @@ const Room = () => {
     checkAccess();
   }, [roomId]);
 
-  // ESC key behavior
+  // Escape key listener for fullscreen exit
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Escape" && isFullscreen) {
@@ -80,7 +99,6 @@ const Room = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [lastEscTime, isFullscreen]);
 
-  // Auto-dismiss ESC notification
   useEffect(() => {
     if (showEscNotification) {
       const timer = setTimeout(() => setShowEscNotification(false), 3000);
@@ -88,7 +106,6 @@ const Room = () => {
     }
   }, [showEscNotification]);
 
-  // Fullscreen change listener
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(document.fullscreenElement !== null);
@@ -98,7 +115,6 @@ const Room = () => {
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
-  // Auto leave on host-left modal timer
   useEffect(() => {
     if (hostLeft && leaveTimer > 0) {
       const interval = setInterval(() => {
@@ -110,23 +126,50 @@ const Room = () => {
     }
   }, [hostLeft, leaveTimer]);
 
-  // 🚫 Access Denied Handling
+  const roomLink = `${window.location.origin}/room/${roomId}`;
+
   if (accessDenied) return <AccessDenied />;
 
   return (
     <div className={`min-h-screen flex flex-col ${isDarkMode ? "bg-[#3C4F67FF]" : "bg-gray-100"}`}>
-      {/* TopBar */}
-      <TopBar roomId={roomId} />
+      <TopBar roomId={roomId} onCopyCode={() => {
+        const code = editorRef.current?.getCode();
+        if (code) {
+          navigator.clipboard.writeText(code);
+          setIsCopied(true);
+          setTimeout(() => setIsCopied(false), 2000);
+        }
+      }} />
 
-      {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
         <ControlBar
-          darkMode={isDarkMode}
+          isCameraOn={isCameraOn}
+          toggleCamera={toggleCamera}
+          isMicOn={isMicOn}
+          toggleMic={toggleMic}
+          isFullScreenApp={isFullscreen}
+          toggleFullScreenApp={toggleFullScreenApp}
           shareRoomLink={shareRoomLink}
           leaveRoom={leaveRoom}
+          sidebarContent={sidebarContent}
+          toggleSidebar={toggleSidebar}
+          showSidebar={showSidebar}
         />
-        <div className="flex-1 p-2">
-          <CodeEditor />
+
+        {/* Main Content Area */}
+        <div className="flex-1 flex">
+          <div className="flex-1 p-2">
+            <CodeEditor ref={editorRef} />
+          </div>
+
+          {/* Participants Sidebar */}
+          {showSidebar && sidebarContent === "participants" && (
+            <ParticipantsSidebar
+              projectId={roomId}
+              darkMode={isDarkMode}
+              onClose={() => setShowSidebar(false)}
+            />
+          )}
         </div>
       </div>
 
@@ -157,7 +200,7 @@ const Room = () => {
         />
       )}
 
-      {/* 🔧 TEMP TEST BUTTON to simulate host left */}
+      {/* TEMP button to simulate host leaving */}
       <button
         onClick={() => {
           setHostLeft(true);

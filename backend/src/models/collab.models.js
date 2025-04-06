@@ -1,27 +1,20 @@
 
 import mongoose from 'mongoose';
 
-const codeSessionSchema = new mongoose.Schema({
+const collabSchema = new mongoose.Schema({
   project: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Project',
     required: true,
   },
 
-  startedAt: {
-    type: Date,
-    default: Date.now,
-  },
-
-  endedAt: {
-    type: Date,
-  },
-
   participants: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
   }],
-
+  content:{
+    type: String,
+  },
   logs: [{
     timestamp: {
       type: Date,
@@ -42,6 +35,6 @@ const codeSessionSchema = new mongoose.Schema({
   timestamps: true
 });
 
-const CodeSession = mongoose.model('CodeSession', codeSessionSchema);
+const Collab = mongoose.model('Collab', collabSchema);
 
-export default CodeSession;
+export default Collab;

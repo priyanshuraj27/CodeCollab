@@ -9,6 +9,8 @@ import {
   removeCollaborator,
   joinProjectByCode,
   getProjectsByTag,
+  getParticipants,
+  getProjectParticipants
 } from "../controllers/project.controllers.js";
 
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -44,4 +46,7 @@ projectRouter.post("/join", joinProjectByCode);
 // 🏷️ Get projects by tag
 projectRouter.get("/tag/:tag", getProjectsByTag);
 
+// 👥 Get all participants (owner + collaborators) for a project
+// projectRouter.get("/:projectId/participants", getParticipants);
+projectRouter.get("/:projectId/participants", getProjectParticipants);
 export default projectRouter;

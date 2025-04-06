@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Clipboard, Save, Expand, Minimize2, Maximize2 } from "lucide-react";
+import { Clipboard, Save, Minimize2, Maximize2, Check } from "lucide-react";
 import { useSelector } from "react-redux";
 
-const TopBar = () => {
+const TopBar = ({ roomId, onCopyCode }) => {
   const darkMode = useSelector((state) => state.theme.darkMode);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -25,6 +26,14 @@ const TopBar = () => {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
   }, []);
+
+  const handleCopy = () => {
+    if (onCopyCode) {
+      onCopyCode();
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
+  };
 
   const bgClass = darkMode
     ? "bg-gradient-to-r from-[#2B7DBD] to-[#1A3C66]"
@@ -56,8 +65,11 @@ const TopBar = () => {
           <option>18px</option>
         </select>
 
-        <button className={`px-3 py-1 rounded flex items-center gap-1 ${buttonCopy}`}>
-          <Clipboard size={16} /> Copy
+        <button
+          onClick={handleCopy}
+          className={`px-3 py-1 rounded flex items-center gap-1 ${buttonCopy}`}
+        >
+          {copied ? <Check size={16} /> : <Clipboard size={16} />} {copied ? "Copied" : "Copy"}
         </button>
 
         <button className={`px-3 py-1 rounded flex items-center gap-1 ${buttonSave}`}>

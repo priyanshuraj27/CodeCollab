@@ -14,6 +14,7 @@ import LandingPage from './pages/Landing';
 import AccessDenied from './components/accessDenied';
 import ControlBar from './components/controlBar';
 import LeaveRoomModal from './components/leaveRoomScreen';
+// import DummyParticipantsView from './components/allParticipant';
 import ProfilePage from './pages/profilePage';
 import GroupPage from './pages/home';
 import Settings from './pages/setting';
@@ -53,6 +54,7 @@ function App() {
           <Route path="/settings" element={<Settings />} />
           {/* <Route path="/room/:roomId" element={<RoomPage />} /> */}
           {/* <Route path="/code-editor" element={<CodeEditor />} /> */}
+          {/* <Route path="/dummy-participants" element={<DummyParticipantsView />} /> */}
           <Route path="/top-bar" element={<TopBar />} />
           <Route path="/room/:roomId" element={<Room />} />
         </Route>

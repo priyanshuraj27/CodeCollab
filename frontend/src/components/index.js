@@ -8,6 +8,7 @@ import LoadingScreen from "./loadingScreen";
 import Footer from "./footer";
 import Header from "./header";
 import TopBar from "./topBar";
+import ParticipantsSidebar from "./allParticipant";
 export {
   LeaveRoomModal,
   AccessDenied,
@@ -19,4 +20,5 @@ export {
   Footer,
   Header,
   TopBar,
+  ParticipantsSidebar,
 };
