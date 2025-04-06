@@ -63,9 +63,7 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Please provide username or email");
   }
 
-  const user = await User.findOne({
-    $or: [{ username }, { email }],
-  });
+  const user = await User.findOne({ $or: [{ username }, { email }] });
   if (!user) {
     throw new ApiError(404, "User not found");
   }
@@ -78,15 +76,27 @@ const loginUser = asyncHandler(async (req, res) => {
   const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
   const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
 
-  const options = { httpOnly: true, secure: true };
-  // console.log("Access Token:", accessToken);
-  // console.log("Refresh Token:", refreshToken);
-  // console.log("Logged In User:", loggedInUser);
+  // Enable cookies on localhost and production
+  const isProd = process.env.NODE_ENV === "production";
+  const cookieOptions = {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? "None" : "Lax",
+  };
+
   return res
     .status(200)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
-    .json(new ApiResponse(200, { user: loggedInUser, accessToken, refreshToken }, "User logged in"));
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
+    .json(new ApiResponse(
+      200,
+      {
+        user: loggedInUser,
+        accessToken,
+        refreshToken,
+      },
+      "User logged in"
+    ));
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
@@ -165,7 +175,7 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
-  console.log("Current User:", req.user);
+  // console
   const user = req.user;
   if (!user) {
     throw new ApiError(404, "User not found");
