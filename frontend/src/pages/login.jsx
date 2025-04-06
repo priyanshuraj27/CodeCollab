@@ -28,6 +28,7 @@ const Login = () => {
     e.preventDefault();
 
     try {
+      console.log("Form Data:", formData); // Debugging line
       const res = await axiosInstance.post("/users/login", {
         email: formData.email,
         password: formData.password,
