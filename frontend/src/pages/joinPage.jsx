@@ -1,9 +1,39 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function JoinMeetingPage() {
   const [roomId, setRoomId] = useState("");
+  const [loading, setLoading] = useState(false);
   const isDarkMode = useSelector((state) => state.theme.darkMode);
+  const navigate = useNavigate();
+
+  const handleJoin = async () => {
+    if (!roomId) return;
+    setLoading(true);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/v1/projects/join",
+        { joinCode: roomId },
+        {
+          withCredentials: true, // ✅ Use cookie-based authentication
+        }
+      );
+
+      if (response.data.success) {
+        navigate("/home");
+      } else {
+        alert("Failed to join project.");
+      }
+    } catch (err) {
+      alert("Invalid Room ID or server error. Please try again.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div
@@ -30,7 +60,7 @@ export default function JoinMeetingPage() {
           type="text"
           placeholder="Enter Room ID"
           value={roomId}
-          onChange={(e) => setRoomId(e.target.value.toUpperCase())}
+          onChange={(e) => setRoomId(e.target.value)}
           className={`w-full px-3 py-2 mb-4 rounded-md border font-mono tracking-wide focus:outline-none focus:ring-2 focus:ring-[#2B7DBD] ${
             isDarkMode
               ? "border-gray-500 bg-[#2B7DBD] text-white"
@@ -39,14 +69,15 @@ export default function JoinMeetingPage() {
         />
 
         <button
-          disabled={!roomId}
+          onClick={handleJoin}
+          disabled={!roomId || loading}
           className={`w-full font-medium py-2 px-4 rounded-md transition-colors duration-200 ${
-            roomId
+            roomId && !loading
               ? "bg-[#1A3C66] hover:bg-[#2B7DBD] text-white"
               : "bg-gray-500 opacity-50 cursor-not-allowed"
           }`}
         >
-          Join Meeting
+          {loading ? "Joining..." : "Join Meeting"}
         </button>
       </div>
     </div>
