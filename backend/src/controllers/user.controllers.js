@@ -79,7 +79,9 @@ const loginUser = asyncHandler(async (req, res) => {
   const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
 
   const options = { httpOnly: true, secure: true };
-
+  // console.log("Access Token:", accessToken);
+  // console.log("Refresh Token:", refreshToken);
+  // console.log("Logged In User:", loggedInUser);
   return res
     .status(200)
     .cookie("accessToken", accessToken, options)
@@ -163,6 +165,10 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
+  const user = req.user;
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
   return res.status(200).json(new ApiResponse(200, req.user, "Current User Fetched Successfully"));
 });
 
@@ -202,6 +208,13 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, user, "Avatar updated successfully"));
 });
 
+const isLoggedIn = asyncHandler(async (req, res) => {
+  const user = req.user;
+  if(!user) {
+    throw new ApiError(401, "Unauthorized request");
+  }
+  return res.status(200).json(new ApiResponse(200, user, "User is logged in"));
+});
 export {
   registerUser,
   loginUser,
@@ -211,4 +224,5 @@ export {
   getCurrentUser,
   updateAccountDetails,
   updateUserAvatar,
+  isLoggedIn,
 };

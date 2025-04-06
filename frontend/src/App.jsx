@@ -1,34 +1,41 @@
-import React, { useEffect } from 'react'
-import './App.css'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import React, { useEffect } from 'react';
+import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
-import Layout from './pages/homePage'
-import Login from './pages/login'
-import Signup from './pages/signup'
-import HostMeetingCard from './pages/hostPage'
-import ProfileSidebar from './components/profileSidebar'
-import JoinMeetingPage from './pages/joinPage'
-import ChatUI from './components/groupChat'
-import LandingPage from './pages/Landing'
-import AccessDenied from './components/accessDenied'
-import ControlBar from './components/controlBar'
-import LeaveRoomModal from './components/leaveRoomScreen'
-import ProfilePage from './pages/profile'
+import Layout from './pages/homePage';
+import Login from './pages/login';
+import Signup from './pages/signup';
+import HostMeetingCard from './pages/hostPage';
+import ProfileSidebar from './components/profileSidebar';
+import JoinMeetingPage from './pages/joinPage';
+import ChatUI from './components/groupChat';
+import LandingPage from './pages/Landing';
+import AccessDenied from './components/accessDenied';
+import ControlBar from './components/controlBar';
+import LeaveRoomModal from './components/leaveRoomScreen';
+import ProfilePage from './pages/profilePage';
+import GroupPage from './pages/home';
+import Settings from './pages/setting';
+import RoomPage from './pages/room';
+import { ToastContainer } from 'react-toastify';
+
+import 'react-toastify/dist/ReactToastify.css';
+
 function App() {
   const isDark = useSelector((state) => state.theme.isDarkMode);
 
-  // Sync Redux theme with HTML tag for Tailwind
   useEffect(() => {
     if (isDark) {
-      document.documentElement.classList.add("dark");
+      document.documentElement.classList.add('dark');
     } else {
-      document.documentElement.classList.remove("dark");
+      document.documentElement.classList.remove('dark');
     }
   }, [isDark]);
 
   return (
     <Router>
+      <ToastContainer /> {/* Add ToastContainer here */}
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<LandingPage />} />
@@ -42,10 +49,13 @@ function App() {
           <Route path="/control-bar" element={<ControlBar />} />
           <Route path="/leave-room" element={<LeaveRoomModal />} />
           <Route path="/profile-page" element={<ProfilePage />} />
+          <Route path="/home" element={<GroupPage />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/room/:roomId" element={<RoomPage />} />
         </Route>
       </Routes>
     </Router>
-  )
+  );
 }
 
-export default App
+export default App;

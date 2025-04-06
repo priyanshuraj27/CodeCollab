@@ -19,6 +19,9 @@ const userRouter = Router();
 userRouter.post("/register", registerUser);
 userRouter.post("/login", loginUser);
 userRouter.post("/refresh-token", refreshAccessToken);
+userRouter.get("/is-logged-in", verifyJWT, (req, res) => {
+  res.status(200).json({ message: "User is logged in" });
+});
 
 // 🔒 Protected Routes
 userRouter.post("/logout", verifyJWT, logoutUser);

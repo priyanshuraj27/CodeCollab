@@ -32,8 +32,7 @@ const Login = () => {
       });
 
       showSuccessToast("Login successful!");
-      // store token or user info if needed: res.data.token, etc.
-      navigate("/dashboard"); // redirect as needed
+      navigate("/home"); 
     } catch (err) {
       showErrorToast(err?.response?.data?.message || "Login failed. Try again.");
     }
