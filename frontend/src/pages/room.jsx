@@ -130,7 +130,7 @@ const Room = () => {
   useEffect(() => {
     if (!roomId) return;
 
-    socketRef.current = io(import.meta.env.VITE_BACKEND_API_URL); // Replace with deployed backend if needed
+    socketRef.current = io("http://localhost:3000"); // Replace with deployed backend if needed
 
     // Join the room
     socketRef.current.emit("join-room", {
