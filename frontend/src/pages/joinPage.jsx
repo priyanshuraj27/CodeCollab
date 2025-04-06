@@ -15,7 +15,7 @@ export default function JoinMeetingPage() {
 
     try {
       const response = await axios.post(
-        "/projects/join",
+        "http://localhost:3000/api/v1/projects/join",
         { joinCode: roomId },
         {
           withCredentials: true, // ✅ Use cookie-based authentication
