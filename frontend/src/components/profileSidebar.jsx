@@ -47,10 +47,10 @@ export default function ProfileSidebar({ closeSidebar }) {
       {/* Profile Section */}
       <div className="flex flex-col items-center mb-6">
         <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#2B7DBD] to-[#1A3C66] flex items-center justify-center text-white text-3xl font-bold">
-          {user?.name?.[0] || "U"}
+          {user?.fullName?.[0] || "U"}
         </div>
         <h3 className="mt-3 text-lg font-semibold">
-          {user?.name || "Loading..."}
+          {user?.fullName || "Loading..."}
         </h3>
         <p className="text-sm opacity-80">{user?.email || ""}</p>
       </div>

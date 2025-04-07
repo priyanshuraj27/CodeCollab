@@ -4,6 +4,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setDarkMode } from "../redux/themeslice";
+import { Settings as SettingsIcon } from "lucide-react";
 import ProfileSidebar from "../components/profileSidebar";
 
 export const Settings = () => {
@@ -47,7 +48,9 @@ export const Settings = () => {
     );
     if (confirmed) {
       try {
-        // await axios.delete("/api/v1/user/delete"); // if exists
+        await axios.delete("/api/v1/user/delete-account", {
+          withCredentials: true,
+        });
         toast.success("Account deleted successfully");
         navigate("/");
       } catch (error) {
@@ -63,20 +66,22 @@ export const Settings = () => {
     }
 
     try {
-      const token = localStorage.getItem("token");
       await axios.post(
-        "/api/v1/user/change-password",
+        "http://localhost:3000/api/v1/users/change-password",
         {
           currentPassword: user.currentPassword,
           newPassword: user.newPassword,
         },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true,
         }
       );
-      toast.success("Password changed successfully");
+      toast.success("Password changed successfully 🚀", {
+        icon: "🔒",
+        position: "top-right",
+        autoClose: 3000,
+      });
+
       setIsEditing(false);
       setUser({
         currentPassword: "",
@@ -107,7 +112,6 @@ export const Settings = () => {
         isDark ? "bg-[#3C4F67]" : "bg-gradient-to-r from-[#D1F1D5] to-[#A7C7E7]"
       }`}
     >
-      {/* Main content */}
       <div className="flex-1 overflow-y-auto p-6">
         <div
           className={`max-w-3xl mx-auto rounded-xl shadow-lg transition-colors ${
@@ -127,8 +131,9 @@ export const Settings = () => {
             </div>
             <button
               onClick={() => setShowSidebar(true)}
-              className="text-sm px-4 py-1 bg-[#2B7DBD] text-white rounded-md hover:bg-[#1D6FA3]"
+              className="flex items-center gap-2 text-sm px-4 py-1 bg-[#2B7DBD] text-white rounded-md hover:bg-[#1D6FA3]"
             >
+              <SettingsIcon className="w-4 h-4" />
               Profile Panel
             </button>
           </div>
@@ -221,11 +226,11 @@ export const Settings = () => {
         </div>
       </div>
 
-      {/* Sidebar (non-fixed, dismissible) */}
+      {/* Sidebar */}
       {showSidebar && (
         <div
           ref={sidebarRef}
-          className={`absolute top-0 right-0 h-full z-50 transition-transform duration-300 ease-in-out`}
+          className="absolute top-0 right-0 h-full z-50 transition-transform duration-300 ease-in-out"
         >
           <ProfileSidebar onClose={() => setShowSidebar(false)} />
         </div>

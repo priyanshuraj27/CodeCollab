@@ -185,15 +185,15 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
-  const { fullName, email } = req.body;
+  const { fullName } = req.body;
 
-  if (!fullName && !email) {
+  if (!fullName) {
     throw new ApiError(400, "All fields are required");
   }
 
   const user = await User.findByIdAndUpdate(
     req.user?._id,
-    { $set: { fullName, email } },
+    { $set: { fullName } },
     { new: true }
   ).select("-password");
 
@@ -227,6 +227,15 @@ const isLoggedIn = asyncHandler(async (req, res) => {
   }
   return res.status(200).json(new ApiResponse(200, user, "User is logged in"));
 });
+
+const deleteUser = asyncHandler(async (req, res) => {
+  const user = await User.findByIdAndDelete(req.user._id);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  return res.status(200).json(new ApiResponse(200, {}, "User deleted successfully"));
+});
 export {
   registerUser,
   loginUser,
@@ -237,4 +246,5 @@ export {
   updateAccountDetails,
   updateUserAvatar,
   isLoggedIn,
+  deleteUser,
 };

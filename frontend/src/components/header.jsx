@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { User } from "lucide-react";
+import { User, FolderKanban } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import ThemeButton from "./toggleMode";
@@ -64,6 +64,17 @@ const Header = () => {
               >
                 Host
               </button>
+
+              {/* 👇 My Projects Icon */}
+              <button
+                onClick={() => navigate("/home")}
+                className="p-2 rounded-full bg-gradient-to-br from-[#2B7DBD] to-[#1A3C66] text-white hover:shadow-lg transition"
+                title="My Projects"
+              >
+                <FolderKanban size={22} />
+              </button>
+
+              {/* 👤 Profile Icon */}
               <div
                 onClick={() => setShowSidebar(true)}
                 className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2B7DBD] to-[#1A3C66] flex items-center justify-center text-white text-2xl cursor-pointer"

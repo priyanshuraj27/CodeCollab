@@ -15,7 +15,7 @@ export default function SessionLoader({ children }) {
         });
 
         if (res.data?.data) {
-          dispatch(setLogin(res.data.data));
+          dispatch(setLogin(res.data.message));
         }
       } catch (err) {
         console.log("Not logged in or session expired:", err.message);
