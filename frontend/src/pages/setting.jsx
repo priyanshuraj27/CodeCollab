@@ -48,7 +48,7 @@ export const Settings = () => {
     );
     if (confirmed) {
       try {
-        await axios.delete("/api/v1/user/delete-account", {
+        await axios.delete("http://localhost:3000/api/v1/users/delete-account", {
           withCredentials: true,
         });
         toast.success("Account deleted successfully");
