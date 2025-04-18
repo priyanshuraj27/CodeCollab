@@ -26,12 +26,14 @@ const CodeEditor = forwardRef(
 
     const handleCodeChange = (newValue) => {
       setCode(newValue);
-      onCodeChange(newValue);
+      onCodeChange(newValue); // Call parent handler
 
       if (socketRef?.current && roomId) {
+        // Emit the new code change to the server (collaborators)
         socketRef.current.emit("CODE_CHANGE", { roomId, code: newValue });
       }
 
+      // Handle typing indication
       setIsTyping(true);
       if (typingTimeout) clearTimeout(typingTimeout);
       const timeout = setTimeout(() => setIsTyping(false), 800);
@@ -46,6 +48,7 @@ const CodeEditor = forwardRef(
     useEffect(() => {
       if (!socketRef?.current) return;
 
+      // Listen for the code synchronization event
       const handleCodeSync = ({ code }) => {
         setCode(code);
       };
@@ -53,7 +56,7 @@ const CodeEditor = forwardRef(
       socketRef.current.on("CODE_SYNC", handleCodeSync);
 
       return () => {
-        socketRef.current.off("CODE_SYNC", handleCodeSync);
+        socketRef.current.off("CODE_SYNC", handleCodeSync); // Cleanup on unmount
       };
     }, [socketRef]);
 

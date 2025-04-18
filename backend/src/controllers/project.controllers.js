@@ -63,18 +63,19 @@ export const updateProject = asyncHandler(async (req, res) => {
 
 // Delete Project
 export const deleteProject = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-
-  const project = await Project.findById(id);
+  // console.log("Deleting project...");
+  const { projectId } = req.params;
+  // console.log("Project ID:", projectId);/
+  const project = await Project.findById(projectId);
   if (!project) throw new ApiError(404, "Project not found");
-
+  
   if (!project.owner.equals(req.user._id)) {
     throw new ApiError(403, "Only the owner can delete this project");
   }
 
   await project.deleteOne();
 
-  res.status(200).json(new ApiResponse(200, null, "Project deleted successfully"));
+  res.status(200).json(new ApiResponse(200, "Project deleted successfully",null));
 });
 
 // Join Project by Join Code

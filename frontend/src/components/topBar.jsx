@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Clipboard, Save, Minimize2, Maximize2, Check } from "lucide-react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { setFontSize,setLanguage } from "../redux/themeslice";
 
-const TopBar = ({ roomId, onCopyCode }) => {
+const TopBar = ({ roomId, onCopyCode, onSave }) => {
+  const dispatch = useDispatch();
   const darkMode = useSelector((state) => state.theme.darkMode);
+  const fontSize = useSelector((state) => state.theme.fontSize);
+  const language = useSelector((state) => state.theme.language);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -20,7 +24,6 @@ const TopBar = ({ roomId, onCopyCode }) => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
-
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () => {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
@@ -33,6 +36,14 @@ const TopBar = ({ roomId, onCopyCode }) => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     }
+  };
+
+  const handleFontSizeChange = (e) => {
+    dispatch(setFontSize(Number(e.target.value)));
+  };
+
+  const handleLanguageChange = (e) => {
+    dispatch(setLanguage(e.target.value));
   };
 
   const bgClass = darkMode
@@ -53,30 +64,43 @@ const TopBar = ({ roomId, onCopyCode }) => {
       <div className={`text-xl font-semibold ${textColor}`}>CodeCollab</div>
 
       <div className="flex items-center gap-3">
-        <select className={`px-2 py-1 rounded ${selectBg}`}>
-          <option>JavaScript</option>
-          <option>Python</option>
-          <option>C++</option>
+        <select
+          value={language}
+          onChange={handleLanguageChange}
+          className={`px-2 py-1 rounded ${selectBg}`}
+        >
+          <option value="javascript">JavaScript</option>
+          <option value="python">Python</option>
+          <option value="cpp">C++</option>
         </select>
 
-        <select className={`px-2 py-1 rounded ${selectBg}`}>
-          <option>14px</option>
-          <option>16px</option>
-          <option>18px</option>
+        <select
+          value={fontSize}
+          onChange={handleFontSizeChange}
+          className={`px-2 py-1 rounded ${selectBg}`}
+        >
+          {[12, 14, 16, 18, 20].map((size) => (
+            <option key={size} value={size}>
+              {size}px
+            </option>
+          ))}
         </select>
 
         <button
           onClick={handleCopy}
           className={`px-3 py-1 rounded flex items-center gap-1 ${buttonCopy}`}
         >
-          {copied ? <Check size={16} /> : <Clipboard size={16} />} {copied ? "Copied" : "Copy"}
+          {copied ? <Check size={16} /> : <Clipboard size={16} />}{" "}
+          {copied ? "Copied" : "Copy"}
         </button>
 
-        <button className={`px-3 py-1 rounded flex items-center gap-1 ${buttonSave}`}>
+        <button
+          onClick={onSave}
+          className={`px-3 py-1 rounded flex items-center gap-1 ${buttonSave}`}
+        >
           <Save size={16} /> Save
         </button>
 
-        {/* Fullscreen toggle button */}
         <button
           onClick={toggleFullscreen}
           className={`p-2 rounded-full hover:bg-white/10 ${

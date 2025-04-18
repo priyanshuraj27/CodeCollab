@@ -217,7 +217,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     { new: true }
   ).select("-password");
 
-  return res.status(200).json(new ApiResponse(200, user, "Avatar updated successfully"));
+  return res.status(200).json(new ApiResponse(200, "Avatar updated successfully",user));
 });
 
 const isLoggedIn = asyncHandler(async (req, res) => {

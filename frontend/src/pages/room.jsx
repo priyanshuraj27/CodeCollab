@@ -33,12 +33,10 @@ const Room = () => {
   const [isMicOn, setIsMicOn] = useState(true);
   const [showSidebar, setShowSidebar] = useState(false);
   const [sidebarContent, setSidebarContent] = useState(null);
-
   const [participants, setParticipants] = useState([]);
   const [owner, setOwner] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  const [messages, setMessages] = useState([]); // Chat messages state
+  const [messages, setMessages] = useState([]);
 
   const editorRef = useRef();
   const socketRef = useRef();
@@ -144,16 +142,13 @@ const Room = () => {
       user: { fullname: "Guest" },
     });
 
-    // Receive code updates
     socketRef.current.on("code-update", ({ code }) => {
       if (editorRef.current?.getCode() !== code) {
         editorRef.current.setCode(code);
       }
     });
 
-    // Receive chat messages
     socketRef.current.on("chat-message", (message) => {
-      console.log("Received message:", message);
       setMessages((prev) => [...prev, message]);
     });
 
@@ -162,15 +157,33 @@ const Room = () => {
     };
   }, [roomId]);
 
+  useEffect(() => {
+    const fetchEditorContent = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:3000/api/v1/editor/get-editor/${roomId}`,
+          { withCredentials: true }
+        );
+        const savedCode = res.data.data.content;
+        if (editorRef.current && savedCode) {
+          editorRef.current.setCode(savedCode);
+        }
+      } catch (err) {
+        console.log("No saved editor content found or failed to fetch.", err);
+      }
+    };
+
+    if (roomId) fetchEditorContent();
+  }, [roomId]);
+
   const sendMessage = (text) => {
     const message = {
       text,
-      sender: "Guest", // Replace with actual user
+      sender: "Guest",
       timestamp: new Date().toISOString(),
     };
 
     socketRef.current.emit("chat-message", { roomId, message });
-    console.log("Sent message:", message);
     setMessages((prev) => [...prev, message]);
   };
 
@@ -211,6 +224,21 @@ const Room = () => {
             navigator.clipboard.writeText(code);
             setIsCopied(true);
             setTimeout(() => setIsCopied(false), 2000);
+          }
+        }}
+        onSave={async () => {
+          const code = editorRef.current?.getCode();
+          if (!code) return alert("No code to save!");
+          try {
+            await axios.patch(
+              `http://localhost:3000/api/v1/editor/save-editor/${roomId}`,
+              { content: code },
+              { withCredentials: true }
+            );
+            alert("Code saved successfully!");
+          } catch (err) {
+            console.error("Save failed:", err);
+            alert("Failed to save code.");
           }
         }}
       />

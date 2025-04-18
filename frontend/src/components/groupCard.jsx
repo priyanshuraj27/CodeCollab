@@ -14,6 +14,7 @@ const GroupCard = ({ groupName, groupDescription, tags, projectId, onDelete }) =
 
   const handleDelete = async () => {
     try {
+      console.log('Deleting project with ID:', projectId);
       const res = await axiosInstance.delete(`/projects/${projectId}`, {
         withCredentials: true,
       });
