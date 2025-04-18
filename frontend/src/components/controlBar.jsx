@@ -13,6 +13,7 @@ const ControlBar = ({
   showSidebar, shareRoomLink,
   isFullScreenApp, toggleFullScreenApp,
   leaveRoom,
+  toggleChat, // ✅ new prop to toggle ChatUI in Room.jsx
 }) => {
   const darkMode = useSelector((state) => state.theme.darkMode);
 
@@ -20,8 +21,8 @@ const ControlBar = ({
     <div
       className={`w-16 flex flex-col items-center py-6 space-y-6 shadow-lg z-10 px-2 ${
         darkMode
-          ? "bg-[#3C4F67FF]" // CodeCollab Dark BG
-          : "bg-gradient-to-b from-[#D1F1D5] to-[#A7C7E7]" // CodeCollab Light Gradient
+          ? "bg-[#3C4F67FF]"
+          : "bg-gradient-to-b from-[#D1F1D5] to-[#A7C7E7]"
       }`}
     >
       {/* CAMERA + MIC */}
@@ -68,11 +69,11 @@ const ControlBar = ({
         </ControlBarButton>
 
         <ControlBarButton
-          onClick={() => toggleSidebar("messages")}
-          active={showSidebar && sidebarContent === "messages"}
+          onClick={toggleChat} // ✅ updated to toggle chat panel
+          active={false} // optional: you can manage chat state if needed
           activeColor="bg-[#2B7DBD] text-white hover:bg-[#1D6FA3]"
           darkMode={darkMode}
-          title="Show Messages"
+          title="Open Chat"
         >
           <MessageCircle size={22} />
         </ControlBarButton>

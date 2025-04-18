@@ -4,7 +4,8 @@ import { X } from "lucide-react";
 
 const ParticipantsSidebar = ({ projectId, onClose, darkMode = false, participants = [], loading = false }) => {
   const [isVisible, setIsVisible] = useState(false);
-
+  // console.log("ParticipantsSidebar rendered with projectId:", projectId);
+  // console.log("ParticipantsSidebar participants:", participants);
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
     return () => clearTimeout(timer);

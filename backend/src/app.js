@@ -18,6 +18,7 @@ app.use(cors({
 import userRouter from './routes/user.routes.js';
 import projectRouter from './routes/project.routes.js';
 import collabRouter from './routes/collab.routes.js';
+import chatRouter from './routes/chat.routes.js';
 // import healthcheckRouter from "./routes/healthcheck.routes.js"
 // import tweetRouter from "./routes/tweet.routes.js"
 // import subscriptionRouter from "./routes/subscription.routes.js"
@@ -31,6 +32,7 @@ import collabRouter from './routes/collab.routes.js';
 app.use("/api/v1/users",userRouter);
 app.use("/api/v1/projects",projectRouter);
 app.use("/api/v1/collab",collabRouter);
+app.use("/api/v1/chat",chatRouter);
 // app.use("/api/v1/tweets", tweetRouter)
 // app.use("/api/v1/healthcheck", healthcheckRouter)
 // app.use("/api/v1/subscriptions", subscriptionRouter)

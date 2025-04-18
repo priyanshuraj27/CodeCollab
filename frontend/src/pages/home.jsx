@@ -23,7 +23,6 @@ const Home = () => {
     fetchProjects();
   }, []);
 
-  // Callback to update UI after deletion
   const handleProjectDelete = (deletedId) => {
     setProjects((prevProjects) =>
       prevProjects.filter((project) => project._id !== deletedId)
@@ -34,8 +33,8 @@ const Home = () => {
     <div
       className={`min-h-screen p-6 ${
         isDarkMode
-          ? 'bg-[#3C4F67FF]' // Matches login dark background
-          : 'bg-gradient-to-br from-[#D1F1D5] to-[#A7C7E7]' // Matches login light background
+          ? 'bg-[#3C4F67FF]'
+          : 'bg-gradient-to-br from-[#D1F1D5] to-[#A7C7E7]'
       }`}
     >
       <h1
@@ -55,16 +54,18 @@ const Home = () => {
           You haven’t created or joined any projects yet.
         </p>
       ) : (
-        projects.map((project) => (
-          <GroupCard
-            key={project._id}
-            projectId={project._id}
-            groupName={project.title}
-            groupDescription={project.description}
-            tags={project.tags || []}
-            onDelete={handleProjectDelete}
-          />
-        ))
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {projects.map((project) => (
+            <GroupCard
+              key={project._id}
+              projectId={project._id}
+              groupName={project.title}
+              groupDescription={project.description}
+              tags={project.tags || []}
+              onDelete={handleProjectDelete}
+            />
+          ))}
+        </div>
       )}
     </div>
   );

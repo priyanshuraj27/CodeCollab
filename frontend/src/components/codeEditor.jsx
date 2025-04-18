@@ -38,7 +38,6 @@ const CodeEditor = forwardRef(
       setTypingTimeout(timeout);
     };
 
-    // 🔥 Add both getCode and setCode for external use
     useImperativeHandle(ref, () => ({
       getCode: () => code,
       setCode: (newCode) => setCode(newCode),

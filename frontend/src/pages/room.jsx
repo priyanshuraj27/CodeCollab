@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
+import axios from "axios";
 import {
   TopBar,
   ControlBar,
@@ -8,6 +9,7 @@ import {
   LeaveRoomModal,
   AccessDenied,
   ParticipantsSidebar,
+  ChatUI,
 } from "../components";
 import CodeEditor from "../components/codeEditor";
 import { useParams, useNavigate } from "react-router-dom";
@@ -17,6 +19,7 @@ const Room = () => {
   const { roomId } = useParams();
   const navigate = useNavigate();
   const isDarkMode = useSelector((state) => state.theme.darkMode);
+  const token = useSelector((state) => state.auth.token);
 
   const [accessDenied, setAccessDenied] = useState(false);
   const [showSharePopup, setShowSharePopup] = useState(false);
@@ -30,6 +33,12 @@ const Room = () => {
   const [isMicOn, setIsMicOn] = useState(true);
   const [showSidebar, setShowSidebar] = useState(false);
   const [sidebarContent, setSidebarContent] = useState(null);
+
+  const [participants, setParticipants] = useState([]);
+  const [owner, setOwner] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const [messages, setMessages] = useState([]); // Chat messages state
 
   const editorRef = useRef();
   const socketRef = useRef();
@@ -72,13 +81,12 @@ const Room = () => {
   useEffect(() => {
     const checkAccess = async () => {
       try {
-        const isAllowed = true; // Replace with your real auth logic
+        const isAllowed = true; // Replace with your auth logic
         if (!isAllowed) setAccessDenied(true);
       } catch (err) {
         setAccessDenied(true);
       }
     };
-
     checkAccess();
   }, [roomId]);
 
@@ -126,24 +134,27 @@ const Room = () => {
     }
   }, [hostLeft, leaveTimer]);
 
-  // === SOCKET.IO SETUP ===
   useEffect(() => {
     if (!roomId) return;
 
-    socketRef.current = io("http://localhost:3000"); // Replace with deployed backend if needed
+    socketRef.current = io("http://localhost:3000");
 
-    // Join the room
     socketRef.current.emit("join-room", {
       roomId,
-      user: { fullname: "Guest" }, // Add real user data if needed
+      user: { fullname: "Guest" },
     });
 
-    // Listen for code updates
+    // Receive code updates
     socketRef.current.on("code-update", ({ code }) => {
-      // console.log("📤 Received code update:", code);  // Add this
       if (editorRef.current?.getCode() !== code) {
         editorRef.current.setCode(code);
       }
+    });
+
+    // Receive chat messages
+    socketRef.current.on("chat-message", (message) => {
+      console.log("Received message:", message);
+      setMessages((prev) => [...prev, message]);
     });
 
     return () => {
@@ -151,8 +162,43 @@ const Room = () => {
     };
   }, [roomId]);
 
-  const roomLink = `${window.location.origin}/room/${roomId}`;
+  const sendMessage = (text) => {
+    const message = {
+      text,
+      sender: "Guest", // Replace with actual user
+      timestamp: new Date().toISOString(),
+    };
 
+    socketRef.current.emit("chat-message", { roomId, message });
+    console.log("Sent message:", message);
+    setMessages((prev) => [...prev, message]);
+  };
+
+  useEffect(() => {
+    const fetchParticipants = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.get(
+          `http://localhost:3000/api/v1/projects/${roomId}/participants`,
+          {
+            withCredentials: true,
+          }
+        );
+        setParticipants(res.data.data.participants);
+        setOwner(res.data.data.owner);
+      } catch (error) {
+        console.error("Error fetching participants:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (roomId && showSidebar && sidebarContent === "participants") {
+      fetchParticipants();
+    }
+  }, [roomId, showSidebar, sidebarContent]);
+
+  const roomLink = `${window.location.origin}/room/${roomId}`;
   if (accessDenied) return <AccessDenied />;
 
   return (
@@ -182,6 +228,7 @@ const Room = () => {
           sidebarContent={sidebarContent}
           toggleSidebar={toggleSidebar}
           showSidebar={showSidebar}
+          toggleChat={() => toggleSidebar("chat")}
         />
 
         <div className="flex-1 flex">
@@ -189,7 +236,6 @@ const Room = () => {
             <CodeEditor
               ref={editorRef}
               onCodeChange={(newCode) => {
-                // console.log("Typing & emitting code:", newCode); // <--- DEBUG LOG
                 if (socketRef.current) {
                   socketRef.current.emit("code-change", { roomId, code: newCode });
                 }
@@ -202,6 +248,19 @@ const Room = () => {
               projectId={roomId}
               darkMode={isDarkMode}
               onClose={() => setShowSidebar(false)}
+              participants={participants}
+              owner={owner}
+              loading={loading}
+            />
+          )}
+
+          {showSidebar && sidebarContent === "chat" && (
+            <ChatUI
+              projectId={roomId}
+              onClose={() => setShowSidebar(false)}
+              darkMode={isDarkMode}
+              messages={messages}
+              sendMessage={sendMessage}
             />
           )}
         </div>

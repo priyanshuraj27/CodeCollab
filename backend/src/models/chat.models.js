@@ -18,7 +18,7 @@ const messageSchema = new mongoose.Schema({
   }
 });
 
-const chatMeetingSchema = new mongoose.Schema({
+const chatSchema = new mongoose.Schema({
   project: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Project',
@@ -35,6 +35,6 @@ const chatMeetingSchema = new mongoose.Schema({
   timestamps: true
 });
 
-const ChatMeeting = mongoose.model('ChatMeeting', chatMeetingSchema);
+const Chat = mongoose.model('Chat', chatSchema);
 
-export default ChatMeeting;
+export default Chat;

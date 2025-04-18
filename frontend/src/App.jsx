@@ -9,12 +9,13 @@ import Signup from './pages/signup';
 import HostMeetingCard from './pages/hostPage';
 import ProfileSidebar from './components/profileSidebar';
 import JoinMeetingPage from './pages/joinPage';
-import ChatUI from './components/groupChat';
+import ChatUI from './components/chatUI';
 import LandingPage from './pages/Landing';
 import AccessDenied from './components/accessDenied';
 import ControlBar from './components/controlBar';
 import LeaveRoomModal from './components/leaveRoomScreen';
 // import DummyParticipantsView from './components/allParticipant';
+import OTPPage from './pages/otpPage';
 import ProfilePage from './pages/profilePage';
 import GroupPage from './pages/home';
 import Settings from './pages/setting';
@@ -52,6 +53,7 @@ function App() {
           <Route path="/profile-page" element={<ProfilePage />} />
           <Route path="/home" element={<GroupPage />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/otp" element={<OTPPage />} />
           {/* <Route path="/room/:roomId" element={<RoomPage />} /> */}
           {/* <Route path="/code-editor" element={<CodeEditor />} /> */}
           {/* <Route path="/dummy-participants" element={<DummyParticipantsView />} /> */}

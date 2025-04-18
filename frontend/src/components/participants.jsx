@@ -3,7 +3,7 @@ import { Settings, UserPlus, Mic, MicOff, Video, VideoOff } from "lucide-react";
 
 const ParticipantsList = ({ participants, darkMode }) => {
   // Ensure we get the array from `participants.message`
-  const participantList = Array.isArray(participants?.message) ? participants.message : [];
+  const participantList = Array.isArray(participants) ? participants : [];
 
   return (
     <div className="p-4">

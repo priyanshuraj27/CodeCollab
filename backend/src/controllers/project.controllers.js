@@ -185,14 +185,28 @@ export const getProjectParticipants = asyncHandler(async (req, res) => {
 
   if (!project) throw new ApiError(404, "Project not found");
 
-  const participants = project.collaborators.map(user => ({
+  // Add host (owner)
+  const host = {
+    email: project.owner.email,
+    fullname: project.owner.fullName,
+    profileImage: project.owner.profileImage || null,
+    isHost: true,
+    isMicOn: true,
+    isCameraOn: true,
+  };
+
+  // Add collaborators
+  const collaborators = project.collaborators.map((user) => ({
+    // host should not be included in collaborators
     email: user.email,
     fullname: user.fullName,
     profileImage: user.profileImage || null,
-    isHost: project.owner._id.equals(user._id),
-    isMicOn: true, // placeholder
-    isCameraOn: true // placeholder
+    isHost: false,
+    isMicOn: true,
+    isCameraOn: true,
   }));
 
-  res.status(200).json(new ApiResponse(200, participants, "Participants fetched"));
+  const participants = [host, ...collaborators];
+
+  res.status(200).json(new ApiResponse(200,  "Participants fetched" , { participants, owner: project.owner }));
 });

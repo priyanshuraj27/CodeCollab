@@ -9,6 +9,7 @@ import Footer from "./footer";
 import Header from "./header";
 import TopBar from "./topBar";
 import ParticipantsSidebar from "./allParticipant";
+import ChatUI from "./chatUI";
 export {
   LeaveRoomModal,
   AccessDenied,
@@ -21,4 +22,5 @@ export {
   Header,
   TopBar,
   ParticipantsSidebar,
+  ChatUI,
 };

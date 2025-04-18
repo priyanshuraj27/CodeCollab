@@ -29,6 +29,7 @@ export const createCollab = asyncHandler(async (req, res) => {
 
 // Get Participants (Excludes Owner)
 export const getParticipants = asyncHandler(async (req, res) => {
+  console.log("Fetching participants...");
     const { collabId } = req.params;
   
     const collab = await Collab.findById(collabId)
